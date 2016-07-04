@@ -39,7 +39,7 @@ RUN set -ex \
         && ldconfig
 
 # install pip
-RUN pip install --no-cache-dir --upgrade --ignore-installed pip==$PYTHON_PIP_VERSION \
+RUN pip3 install --no-cache-dir --upgrade --ignore-installed pip==$PYTHON_PIP_VERSION \
         && find /usr/local \
                 \( -type d -a -name test -o -name tests \) \
                 -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
