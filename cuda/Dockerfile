@@ -1,12 +1,17 @@
-FROM buildpack-deps:xenial
+FROM nvidia/cuda:7.5-cudnn5-devel
 
 MAINTAINER Edgar Y. Walker <edgar.walker@gmail.com>
 
-# The rest is Python installation procedure copied from official
-# Python image, installed on Debian base image
+ENV PYTHON_VERSION 3.5.1
+ENV LANG C.UTF-8
 
-# remove several traces of debian python
-RUN apt-get purge -y python.*
+WORKDIR /src
+
+# Install dependencies
+RUN apt-get update \
+    && apt-get install -y build-essential curl wget libssl-dev \
+    && apt-get purge -y python.* \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV LANG C.UTF-8
 
@@ -14,8 +19,6 @@ ENV LANG C.UTF-8
 ENV GPG_KEY 97FC712E4C024BBEA48A61ED3A5CA953F73C700D
 
 ENV PYTHON_VERSION 3.5.1
-
-# if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
 ENV PYTHON_PIP_VERSION 8.1.1
 
 RUN set -ex \
@@ -33,21 +36,22 @@ RUN set -ex \
         && ./configure --enable-shared --enable-unicode=ucs4 \
         && make -j$(nproc) \
         && make install \
-        && ldconfig \
-        && pip3 install --no-cache-dir --upgrade --ignore-installed pip==$PYTHON_PIP_VERSION \
+        && ldconfig
+
+# install pip
+RUN pip install --no-cache-dir --upgrade --ignore-installed pip==$PYTHON_PIP_VERSION \
         && find /usr/local \
                 \( -type d -a -name test -o -name tests \) \
                 -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
                 -exec rm -rf '{}' + \
         && rm -rf /usr/src/python
 
-# make some usefule symlinks that are expected to exist
+# make useful symlinks
 RUN cd /usr/local/bin \
-        && ln -s easy_install-3.5 easy_install \
-        && ln -s idle3 idle \
-        && ln -s pydoc3 pydoc \
-        && ln -s python3 python \
-        && ln -s python-config3 python-config
+       && ln -s easy_install-3.5 easy_install \
+       && ln -s idle3 idle \
+       && ln -s pydoc3 pydoc \
+       && ln -s python3 python \
+       && ln -s python-config3 python-config
 
 CMD ["python3"]
-
