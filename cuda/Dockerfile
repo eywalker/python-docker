@@ -9,7 +9,7 @@ WORKDIR /src
 
 # Install dependencies
 RUN apt-get update \
-    && apt-get install -y build-essential curl wget libssl-dev \
+    && apt-get install -y build-essential curl wget libssl-dev libsqlite3-dev\
     && apt-get purge -y python.* \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
